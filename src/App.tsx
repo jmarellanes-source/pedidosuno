@@ -1,5 +1,5 @@
 // src/App.tsx
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import AuthPage from './pages/Auth'
 import Products from './pages/Products'
@@ -12,7 +12,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/auth" element={<AuthPage />} />
-        <Route path="/" element={<Navigate to="/products" />} />
+        <Route path="/" element={<Navigate to="/products" replace />} />
         
         {/* Rutas protegidas */}
         <Route element={<ProtectedRoute />}>

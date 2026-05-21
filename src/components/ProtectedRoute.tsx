@@ -1,14 +1,10 @@
 // src/components/ProtectedRoute.tsx
 import { useEffect, useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, Outlet } from 'react-router-dom' // ← Importar Outlet
 import { supabase } from '../lib/supabase'
 import type { User } from '@supabase/supabase-js'
 
-interface ProtectedRouteProps {
-  children: React.ReactNode
-}
-
-export function ProtectedRoute({ children }: ProtectedRouteProps) {
+export function ProtectedRoute() {
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<User | null>(null)
 
@@ -33,5 +29,6 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     return <Navigate to="/auth" replace />
   }
 
-  return <>{children}</>
+  // Outlet renderiza las rutas hijas (products, cart, checkout, etc.)
+  return <Outlet />
 }
