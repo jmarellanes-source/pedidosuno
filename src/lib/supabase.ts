@@ -1,14 +1,14 @@
 // src/lib/supabase.ts
 import { createClient } from '@supabase/supabase-js'
-import type { Database } from '../types/supabase' // Cuando generes los tipos automáticos
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 
-// Cliente tipado - autocompletado mágico en todo tu código
-export const supabase = createClient<Database>(supabaseUrl, supabaseKey)
+console.log('Supabase URL:', supabaseUrl ? 'Configurada' : 'FALTA')
+console.log('Supabase Key:', supabaseKey ? 'Configurada' : 'FALTA')
 
-// Tipo auxiliar para las respuestas
-export type Tables = Database['public']['Tables']
-export type Product = Tables['products']['Row']
-export type Order = Tables['orders']['Row']
+if (!supabaseUrl || !supabaseKey) {
+  console.error('FALTAN LAS VARIABLES DE ENTORNO DE SUPABASE')
+}
+
+export const supabase = createClient(supabaseUrl, supabaseKey)

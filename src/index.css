@@ -1,3 +1,13 @@
+/* src/index.css */
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #3b82f6;
+  --color-primary-dark: #2563eb;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --spacing: 0.25rem;
+}
+
 :root {
   --text: #6b6375;
   --text-h: #08060d;

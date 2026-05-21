@@ -1,4 +1,4 @@
-// src/pages/Auth.tsx
+
 // src/pages/Auth.tsx (versión con CSS puro)
 import { Auth } from '@supabase/auth-ui-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'

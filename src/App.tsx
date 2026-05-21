@@ -1,7 +1,7 @@
 // src/App.tsx
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ProtectedRoute } from './components/ProtectedRoute'
-import AuthPage from './pages/Auth'
+import AuthPage from './pages/Auth.tsx'
 import Products from './pages/Products'
 import Cart from './pages/Cart' // Asumiendo que tienes esta página
 import Checkout from './pages/Checkout'

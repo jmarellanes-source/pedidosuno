@@ -1,0 +1,12 @@
+// src/pages/Auth.tsx (Componente mínimo de prueba)
+export default function AuthPage() {
+  return (
+    <div style={{ padding: '20px', textAlign: 'center' }}>
+      <h1>Página de Autenticación</h1>
+      <p>Si ves esto, el componente Auth está funcionando.</p>
+      <button onClick={() => window.location.href = '/products'}>
+        Ir a Productos (simulado)
+      </button>
+    </div>
+  )
+}

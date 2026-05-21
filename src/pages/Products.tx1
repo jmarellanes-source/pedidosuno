@@ -1,0 +1,15 @@
+// Versión de prueba sin Supabase
+export default function Products() {
+  const productosPrueba = [
+    { id: '1', name: 'Producto Test 1', price: 19.99, stock: 5, description: 'Test', image_url: null, category: 'Test', created_at: new Date().toISOString() }
+  ]
+  
+  return (
+    <div className="p-4">
+      <h1>Productos (Modo Prueba)</h1>
+      {productosPrueba.map(p => (
+        <div key={p.id}>{p.name} - ${p.price}</div>
+      ))}
+    </div>
+  )
+}
