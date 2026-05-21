@@ -1,4 +1,5 @@
 // src/pages/Auth.tsx
+// src/pages/Auth.tsx (versión con CSS puro)
 import { Auth } from '@supabase/auth-ui-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { supabase } from '../lib/supabase'
@@ -8,8 +9,11 @@ import { Navigate } from 'react-router-dom'
 export default function AuthPage() {
   const { user, loading } = useAuth()
 
-  // Si ya está autenticado, redirigir a productos
-  if (!loading && user) {
+  if (loading) {
+    return <div className="text-center p-8">Cargando...</div>
+  }
+
+  if (user) {
     return <Navigate to="/products" replace />
   }
 
@@ -18,17 +22,7 @@ export default function AuthPage() {
       <h1 className="text-2xl font-bold mb-6 text-center">Mi App de Pedidos</h1>
       <Auth
         supabaseClient={supabase}
-        appearance={{ 
-          theme: ThemeSupa,
-          variables: {
-            default: {
-              colors: {
-                brand: '#3b82f6',
-                brandAccent: '#2563eb',
-              }
-            }
-          }
-        }}
+        appearance={{ theme: ThemeSupa }}
         providers={['google']}
         redirectTo={window.location.origin}
       />
