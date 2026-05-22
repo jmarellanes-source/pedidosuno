@@ -1,42 +1,66 @@
 // src/pages/AuthCallback.tsx
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
 export default function AuthCallback() {
   const navigate = useNavigate();
-  // Evita que el efecto se ejecute dos veces en modo estricto
-  const processed = useRef(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (processed.current) return;
-    processed.current = true;
-
     const handleCallback = async () => {
-      // La sesión se captura automáticamente de la URL por el cliente de Supabase
-      const { data, error } = await supabase.auth.getSession();
-
-      if (error) {
-        console.error('Error al obtener la sesión:', error.message);
-        // Redirige al login si hay error
-        navigate('/auth', { replace: true });
-        return;
-      }
-
-      if (data?.session) {
-        // Autenticación exitosa, redirige a la página principal
-        console.log('Sesión establecida para:', data.session.user.email);
-        navigate('/products', { replace: true });
-      } else {
-        // No se encontró sesión, a login
-        navigate('/auth', { replace: true });
+      try {
+        // Obtener la URL completa con el fragmento (#)
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
+        
+        if (accessToken && refreshToken) {
+          // Si tenemos tokens en el hash, establecer la sesión manualmente
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+          });
+          
+          if (error) throw error;
+          
+          if (data.session) {
+            console.log('Sesión establecida manualmente');
+            navigate('/products', { replace: true });
+            return;
+          }
+        }
+        
+        // Si no hay tokens en el hash, intentar obtener la sesión normalmente
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session) {
+          navigate('/products', { replace: true });
+        } else {
+          navigate('/auth', { replace: true });
+        }
+        
+      } catch (err) {
+        console.error('Error en callback:', err);
+        setError(err instanceof Error ? err.message : 'Error al procesar autenticación');
+        setTimeout(() => navigate('/auth', { replace: true }), 3000);
       }
     };
-
+    
     handleCallback();
   }, [navigate]);
 
-  // Muestra un mensaje de carga mientras se procesa
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-center text-red-600">
+          <p>Error: {error}</p>
+          <p>Redirigiendo...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex justify-center items-center h-screen">
       <div className="text-center">
