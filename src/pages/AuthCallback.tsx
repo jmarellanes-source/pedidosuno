@@ -1,68 +1,40 @@
 // src/pages/AuthCallback.tsx
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
 export default function AuthCallback() {
   const navigate = useNavigate();
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        // 🔑 Obtener el código de la URL (para flujo PKCE)
-        const searchParams = new URLSearchParams(window.location.search);
-        const code = searchParams.get('code');
+        // Verificar si hay una sesión después de la redirección
+        const { data: { session }, error } = await supabase.auth.getSession();
         
-        console.log('🔍 Procesando callback. URL:', window.location.href);
-        console.log('🔍 Código encontrado:', code);
-        
-        if (code) {
-          // Intercambiar el código por una sesión (PKCE)
-          console.log('🔄 Intercambiando código por sesión...');
-          const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-          
-          if (exchangeError) throw exchangeError;
-          
-          if (data.session) {
-            console.log('✅ Sesión establecida correctamente para:', data.session.user.email);
-            navigate('/products', { replace: true });
-            return;
-          }
+        if (error) {
+          console.error('Error al obtener sesión:', error);
+          navigate('/auth', { replace: true });
+          return;
         }
         
-        // Si no hay código, intentar obtener sesión existente
-        console.log('ℹ️ No hay código en URL, verificando sesión existente...');
-        const { data: { session } } = await supabase.auth.getSession();
-        
         if (session) {
-          console.log('✅ Sesión existente encontrada para:', session.user.email);
+          console.log('✅ Sesión establecida para:', session.user.email);
           navigate('/products', { replace: true });
         } else {
-          console.log('❌ No hay sesión, redirigiendo a login');
+          console.log('❌ No se encontró sesión');
           navigate('/auth', { replace: true });
         }
         
       } catch (err) {
-        console.error('❌ Error en callback:', err);
-        setError(err instanceof Error ? err.message : 'Error al procesar autenticación');
-        setTimeout(() => navigate('/auth', { replace: true }), 3000);
+        console.error('Error en callback:', err);
+        navigate('/auth', { replace: true });
       }
     };
     
-    handleCallback();
+    // Pequeño retraso para asegurar que Supabase procese la URL
+    setTimeout(handleCallback, 100);
   }, [navigate]);
-
-  if (error) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-center text-red-600">
-          <p>Error: {error}</p>
-          <p>Redirigiendo...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex justify-center items-center h-screen">

@@ -14,7 +14,7 @@ if (!supabaseUrl || !supabaseKey) {
 // Crear cliente con configuración PKCE
 export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
-    flowType: 'pkce',  // ← Aquí va la configuración
+    flowType: 'implicit',  // ← Aquí va la configuración
     autoRefreshToken: true,
     detectSessionInUrl: true,
     persistSession: true,
