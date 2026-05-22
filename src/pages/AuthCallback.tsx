@@ -1,4 +1,4 @@
-// src/pages/AuthCallback.tsx
+// Versión sin timeout (más robusta pero opcional)
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
@@ -7,33 +7,13 @@ export default function AuthCallback() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const handleCallback = async () => {
-      try {
-        // Verificar si hay una sesión después de la redirección
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error('Error al obtener sesión:', error);
-          navigate('/auth', { replace: true });
-          return;
-        }
-        
-        if (session) {
-          console.log('✅ Sesión establecida para:', session.user.email);
-          navigate('/products', { replace: true });
-        } else {
-          console.log('❌ No se encontró sesión');
-          navigate('/auth', { replace: true });
-        }
-        
-      } catch (err) {
-        console.error('Error en callback:', err);
-        navigate('/auth', { replace: true });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_IN') {
+        navigate('/products', { replace: true });
       }
-    };
-    
-    // Pequeño retraso para asegurar que Supabase procese la URL
-    setTimeout(handleCallback, 100);
+    });
+
+    return () => subscription.unsubscribe();
   }, [navigate]);
 
   return (
