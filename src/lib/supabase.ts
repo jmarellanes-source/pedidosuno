@@ -11,4 +11,12 @@ if (!supabaseUrl || !supabaseKey) {
   console.error('FALTAN LAS VARIABLES DE ENTORNO DE SUPABASE')
 }
 
-export const supabase = createClient(supabaseUrl, supabaseKey)
+// Crear cliente con configuración PKCE
+export const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    flowType: 'pkce',  // ← Aquí va la configuración
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    persistSession: true,
+  },
+})
