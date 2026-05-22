@@ -36,4 +36,8 @@ export const router = createBrowserRouter([
     path: '/auth/callback',
     element: <AuthCallback />,
   },
+    {
+    path: '*',  // ← Ruta para manejar 404
+    element: <div>Página no encontrada</div>,
+  },
 ]);
