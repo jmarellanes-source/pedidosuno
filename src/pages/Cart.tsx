@@ -1,4 +1,5 @@
 // src/pages/Cart.tsx
+import { useState } from 'react' // ✅ IMPORTANTE: Agregar este import
 import { Link, useNavigate } from 'react-router-dom'
 import { useCartStore } from '../stores/cartStore'
 import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react'
@@ -19,19 +20,17 @@ export default function Cart() {
     }
   }
 
-  const handleRemoveItem = (productId: string) => {
-    //if (confirm('¿Eliminar este producto del carrito?')) {
-      removeItem(productId)
+  const handleRemoveItem = () => {
+    if (itemToRemove) {
+      removeItem(itemToRemove)
       setShowRemoveModal(false)
       setItemToRemove(null)
-    //}
+    }
   }
 
   const handleClearCart = () => {
-    //if (confirm('¿Vaciar completamente el carrito?')) {
-      clearCart()
-      setShowClearModal(false)
-    //}
+    clearCart()
+    setShowClearModal(false)
   }
 
   const handleCheckout = () => {
@@ -139,7 +138,10 @@ export default function Cart() {
                       {/* Acciones - 1 columna */}
                       <div className="col-span-1 text-right">
                         <button
-                          onClick={() => handleRemoveItem(item.id)}
+                          onClick={() => {
+                            setItemToRemove(item.id)
+                            setShowRemoveModal(true)
+                          }}
                           className="text-red-500 hover:text-red-700 transition"
                           aria-label="Eliminar producto"
                         >
@@ -165,7 +167,10 @@ export default function Cart() {
                           )}
                         </div>
                         <button
-                          onClick={() => handleRemoveItem(item.id)}
+                          onClick={() => {
+                            setItemToRemove(item.id)
+                            setShowRemoveModal(true)
+                          }}
                           className="text-red-500 hover:text-red-700"
                         >
                           <Trash2 className="w-5 h-5" />
@@ -208,7 +213,71 @@ export default function Cart() {
               </AnimatePresence>
             </div>
           </div>
+          
+          <div className="mt-4 flex justify-between">
+            <Link 
+              to="/products"
+              className="text-blue-500 hover:text-blue-700 transition flex items-center gap-2"
+            >
+              ← Seguir comprando
+            </Link>
+            
+            {items.length > 0 && (
+              <button
+                onClick={() => setShowClearModal(true)} // ✅ Cambiado: abre el modal, no ejecuta clear directamente
+                className="text-red-500 hover:text-red-700 transition"
+              >
+                Vaciar carrito
+              </button>
+            )}
+          </div>
+        </div>
+        
+        {/* Resumen del pedido */}
+        <div className="lg:w-96">
+          <div className="bg-white rounded-lg shadow-md p-6 sticky top-4">
+            <h2 className="text-xl font-bold mb-4">Resumen del Pedido</h2>
+            
+            <div className="space-y-3 mb-4">
+              <div className="flex justify-between text-gray-600">
+                <span>Subtotal ({getItemCount()} productos):</span>
+                <span>${getTotal().toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-gray-600">
+                <span>Envío:</span>
+                <span className="text-green-600">Gratis</span>
+              </div>
+              <div className="border-t pt-3 mt-3">
+                <div className="flex justify-between text-xl font-bold">
+                  <span>Total:</span>
+                  <span className="text-blue-600">${getTotal().toFixed(2)}</span>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  *Los impuestos están incluidos en el precio final
+                </p>
+              </div>
+            </div>
+            
+            <button
+              onClick={handleCheckout}
+              className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition font-semibold"
+            >
+              Proceder al Pago
+            </button>
+            
+            <div className="mt-4 text-center text-xs text-gray-500">
+              <p>Aceptamos:</p>
+              <div className="flex justify-center gap-2 mt-1">
+                <span className="px-2 py-1 bg-gray-100 rounded">💳 Visa</span>
+                <span className="px-2 py-1 bg-gray-100 rounded">💳 Mastercard</span>
+                <span className="px-2 py-1 bg-gray-100 rounded">💳 PayPal</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
+      {/* ✅ Modales movidos FUERA del div flex para que no afecten el layout */}
       {/* Modal personalizado para Vaciar Carrito */}
       <AnimatePresence>
         {showClearModal && (
@@ -268,7 +337,7 @@ export default function Cart() {
             >
               <h3 className="text-xl font-bold mb-4">Eliminar Producto</h3>
               <p className="text-gray-600 mb-6">
-                ¿Eliminar este producto del carrito?
+                ¿Estás seguro de que quieres eliminar este producto del carrito?
               </p>
               <div className="flex gap-3 justify-end">
                 <button
@@ -278,7 +347,7 @@ export default function Cart() {
                   Cancelar
                 </button>
                 <button
-                  onClick={() => handleRemoveItem(itemToRemove)}
+                  onClick={handleRemoveItem}
                   className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
                 >
                   Sí, Eliminar
@@ -288,73 +357,6 @@ export default function Cart() {
           </motion.div>
         )}
       </AnimatePresence>
-
-
-          
-          <div className="mt-4 flex justify-between">
-            <Link 
-              to="/products"
-              className="text-blue-500 hover:text-blue-700 transition flex items-center gap-2"
-            >
-              ← Seguir comprando
-            </Link>
-            
-            {items.length > 0 && (
-              <button
-                onClick={handleClearCart}
-                className="text-red-500 hover:text-red-700 transition"
-              >
-                Vaciar carrito
-              </button>
-            )}
-          </div>
-        </div>
-        
-        {/* Resumen del pedido */}
-        <div className="lg:w-96">
-          <div className="bg-white rounded-lg shadow-md p-6 sticky top-4">
-            <h2 className="text-xl font-bold mb-4">Resumen del Pedido</h2>
-            
-            <div className="space-y-3 mb-4">
-              <div className="flex justify-between text-gray-600">
-                <span>Subtotal ({getItemCount()} productos):</span>
-                <span>${getTotal().toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-gray-600">
-                <span>Envío:</span>
-                <span className="text-green-600">Gratis</span>
-              </div>
-              <div className="border-t pt-3 mt-3">
-                <div className="flex justify-between text-xl font-bold">
-                  <span>Total:</span>
-                  <span className="text-blue-600">${getTotal().toFixed(2)}</span>
-                </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  *Los impuestos están incluidos en el precio final
-                </p>
-              </div>
-            </div>
-            
-            <button
-              onClick={handleCheckout}
-              className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition font-semibold"
-            >
-              Proceder al Pago
-            </button>
-            
-            <div className="mt-4 text-center text-xs text-gray-500">
-              <p>Aceptamos:</p>
-              <div className="flex justify-center gap-2 mt-1">
-                <span className="px-2 py-1 bg-gray-100 rounded">💳 Visa</span>
-                <span className="px-2 py-1 bg-gray-100 rounded">💳 Mastercard</span>
-                <span className="px-2 py-1 bg-gray-100 rounded">💳 PayPal</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
-
-    
   )
 }
