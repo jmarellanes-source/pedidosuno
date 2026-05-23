@@ -2,7 +2,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useCartStore } from '../stores/cartStore'
 import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react'
-// Versión con animaciones (extensión del Cart.tsx)
 import { motion, AnimatePresence } from 'framer-motion'
 
 export default function Cart() {
@@ -59,98 +58,147 @@ export default function Cart() {
         {/* Lista de productos */}
         <div className="flex-1">
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            {/* Header - Desktop only */}
             <div className="hidden md:grid grid-cols-12 gap-4 bg-gray-100 p-4 font-semibold text-gray-700">
-              <div className="col-span-6">Producto</div>
+              <div className="col-span-5">Producto</div>
               <div className="col-span-2 text-center">Precio</div>
-              <div className="col-span-2 text-center">Cantidad</div>
-              <div className="col-span-1 text-center">Subtotal</div>
+              <div className="col-span-3 text-center">Cantidad</div>
+              <div className="col-span-1 text-center">Total</div>
               <div className="col-span-1"></div>
             </div>
             
             <div className="divide-y divide-gray-200">
-
-            <AnimatePresence mode="popLayout">
-              {items.map((item) => (
-    
-        <motion.div
-      key={item.id}
-      layout
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 20 }}
-      transition={{ duration: 0.2 }}
-      className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 items-center border-b"
-    >
-
-                <div 
-                key={item.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 items-center">
-                  {/* Imagen y nombre del producto */}
-                  <div className="col-span-12 md:col-span-6 flex items-center gap-4">
-                    {item.image_url && (
-                      <img 
-                        src={item.image_url} 
-                        alt={item.name}
-                        className="w-16 h-16 object-cover rounded-md"
-                      />
-                    )}
-                    <div>
-                      <h3 className="font-semibold text-gray-800">{item.name}</h3>
-                      {item.category && (
-                        <p className="text-sm text-gray-500">{item.category}</p>
-                      )}
+              <AnimatePresence mode="popLayout">
+                {items.map((item) => (
+                  <motion.div
+                    key={item.id}
+                    layout
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.2 }}
+                    className="p-4"
+                  >
+                    {/* Grid para desktop - 12 columnas */}
+                    <div className="hidden md:grid grid-cols-12 gap-4 items-center">
+                      {/* Producto - 5 columnas */}
+                      <div className="col-span-5 flex items-center gap-4">
+                        {item.image_url && (
+                          <img 
+                            src={item.image_url} 
+                            alt={item.name}
+                            className="w-16 h-16 object-cover rounded-md"
+                          />
+                        )}
+                        <div>
+                          <h3 className="font-semibold text-gray-800">{item.name}</h3>
+                          {item.category && (
+                            <p className="text-sm text-gray-500">{item.category}</p>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Precio - 2 columnas */}
+                      <div className="col-span-2 text-center">
+                        ${item.price.toFixed(2)}
+                      </div>
+                      
+                      {/* Cantidad - 3 columnas */}
+                      <div className="col-span-3">
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            onClick={() => handleUpdateQuantity(item.id, item.quantity, -1)}
+                            className="p-1 rounded-md bg-gray-200 hover:bg-gray-300 transition"
+                            aria-label="Disminuir cantidad"
+                          >
+                            <Minus className="w-4 h-4" />
+                          </button>
+                          <span className="w-10 text-center font-medium">{item.quantity}</span>
+                          <button
+                            onClick={() => handleUpdateQuantity(item.id, item.quantity, 1)}
+                            className="p-1 rounded-md bg-gray-200 hover:bg-gray-300 transition"
+                            aria-label="Aumentar cantidad"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                      
+                      {/* Total - 1 columna */}
+                      <div className="col-span-1 text-center font-semibold text-blue-600">
+                        ${(item.price * item.quantity).toFixed(2)}
+                      </div>
+                      
+                      {/* Acciones - 1 columna */}
+                      <div className="col-span-1 text-right">
+                        <button
+                          onClick={() => handleRemoveItem(item.id)}
+                          className="text-red-500 hover:text-red-700 transition"
+                          aria-label="Eliminar producto"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                  
-                  {/* Precio */}
-                  <div className="col-span-6 md:col-span-2 text-left md:text-center">
-                    <span className="md:hidden font-semibold text-sm text-gray-500">Precio: </span>
-                    ${item.price.toFixed(2)}
-                  </div>
-                  
-                  {/* Cantidad */}
-                  <div className="col-span-6 md:col-span-2">
-                    <div className="flex items-center justify-start md:justify-center gap-2">
-                      <button
-                        onClick={() => handleUpdateQuantity(item.id, item.quantity, -1)}
-                        className="p-1 rounded-md bg-gray-200 hover:bg-gray-300 transition"
-                        aria-label="Disminuir cantidad"
-                      >
-                        <Minus className="w-4 h-4" />
-                      </button>
-                      <span className="w-10 text-center font-medium">{item.quantity}</span>
-                      <button
-                        onClick={() => handleUpdateQuantity(item.id, item.quantity, 1)}
-                        className="p-1 rounded-md bg-gray-200 hover:bg-gray-300 transition"
-                        aria-label="Aumentar cantidad"
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                  
-                  {/* Subtotal */}
-                  <div className="col-span-5 md:col-span-1">
-                    <span className="md:hidden font-semibold text-sm text-gray-500">Subtotal: </span>
-                    <span className="font-semibold text-blue-600">
-                      ${(item.price * item.quantity).toFixed(2)}
-                    </span>
-                  </div>
-                  
-                  {/* Acciones */}
-                  <div className="col-span-7 md:col-span-1 text-right">
-                    <button
-                      onClick={() => handleRemoveItem(item.id)}
-                      className="text-red-500 hover:text-red-700 transition"
-                      aria-label="Eliminar producto"
-                    >
-                      <Trash2 className="w-5 h-5 inline" />
-                    </button>
-                  </div>
-                </div>
-    </motion.div>
-  ))}
-</AnimatePresence>
 
+                    {/* Vista Mobile - flex layout */}
+                    <div className="md:hidden space-y-3">
+                      <div className="flex items-center gap-4">
+                        {item.image_url && (
+                          <img 
+                            src={item.image_url} 
+                            alt={item.name}
+                            className="w-16 h-16 object-cover rounded-md"
+                          />
+                        )}
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-800">{item.name}</h3>
+                          {item.category && (
+                            <p className="text-sm text-gray-500">{item.category}</p>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => handleRemoveItem(item.id)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm text-gray-500">Precio</p>
+                          <p className="font-medium">${item.price.toFixed(2)}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Cantidad</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <button
+                              onClick={() => handleUpdateQuantity(item.id, item.quantity, -1)}
+                              className="p-1 rounded-md bg-gray-200 hover:bg-gray-300 transition"
+                            >
+                              <Minus className="w-4 h-4" />
+                            </button>
+                            <span className="w-8 text-center font-medium">{item.quantity}</span>
+                            <button
+                              onClick={() => handleUpdateQuantity(item.id, item.quantity, 1)}
+                              className="p-1 rounded-md bg-gray-200 hover:bg-gray-300 transition"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="col-span-2">
+                          <p className="text-sm text-gray-500">Total</p>
+                          <p className="font-semibold text-blue-600">
+                            ${(item.price * item.quantity).toFixed(2)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
           </div>
           
