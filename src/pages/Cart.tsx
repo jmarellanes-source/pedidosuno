@@ -7,6 +7,10 @@ import { motion, AnimatePresence } from 'framer-motion'
 export default function Cart() {
   const navigate = useNavigate()
   const { items, removeItem, updateQuantity, getTotal, getItemCount, clearCart } = useCartStore()
+  
+  const [showClearModal, setShowClearModal] = useState(false)
+  const [showRemoveModal, setShowRemoveModal] = useState(false)
+  const [itemToRemove, setItemToRemove] = useState<string | null>(null)
 
   const handleUpdateQuantity = (productId: string, currentQuantity: number, change: number) => {
     const newQuantity = currentQuantity + change
@@ -16,15 +20,18 @@ export default function Cart() {
   }
 
   const handleRemoveItem = (productId: string) => {
-    if (confirm('¿Eliminar este producto del carrito?')) {
+    //if (confirm('¿Eliminar este producto del carrito?')) {
       removeItem(productId)
-    }
+      setShowRemoveModal(false)
+      setItemToRemove(null)
+    //}
   }
 
   const handleClearCart = () => {
-    if (confirm('¿Vaciar completamente el carrito?')) {
+    //if (confirm('¿Vaciar completamente el carrito?')) {
       clearCart()
-    }
+      setShowClearModal(false)
+    //}
   }
 
   const handleCheckout = () => {
@@ -201,6 +208,88 @@ export default function Cart() {
               </AnimatePresence>
             </div>
           </div>
+
+      {/* Modal personalizado para Vaciar Carrito */}
+      <AnimatePresence>
+        {showClearModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+            onClick={() => setShowClearModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-lg p-6 max-w-md mx-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-xl font-bold mb-4">Vaciar Carrito</h3>
+              <p className="text-gray-600 mb-6">
+                ¿Estás seguro de que quieres eliminar todos los productos del carrito?
+              </p>
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={() => setShowClearModal(false)}
+                  className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleClearCart}
+                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+                >
+                  Sí, Vaciar Carrito
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal para eliminar un producto */}
+      <AnimatePresence>
+        {showRemoveModal && itemToRemove && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+            onClick={() => setShowRemoveModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-lg p-6 max-w-md mx-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-xl font-bold mb-4">Eliminar Producto</h3>
+              <p className="text-gray-600 mb-6">
+                ¿Eliminar este producto del carrito?
+              </p>
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={() => setShowRemoveModal(false)}
+                  className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => handleRemoveItem(itemToRemove)}
+                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+                >
+                  Sí, Eliminar
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+
           
           <div className="mt-4 flex justify-between">
             <Link 
@@ -265,5 +354,7 @@ export default function Cart() {
         </div>
       </div>
     </div>
+
+    
   )
 }
