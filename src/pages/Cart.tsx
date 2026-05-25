@@ -1,5 +1,5 @@
 // src/pages/Cart.tsx
-import { useState } from 'react' // ✅ IMPORTANTE: Agregar este import
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useCartStore } from '../stores/cartStore'
 import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react'
@@ -12,6 +12,9 @@ export default function Cart() {
   const [showClearModal, setShowClearModal] = useState(false)
   const [showRemoveModal, setShowRemoveModal] = useState(false)
   const [itemToRemove, setItemToRemove] = useState<string | null>(null)
+
+  // 🔥 Obtener el producto completo a eliminar
+  const productToRemove = items.find(item => item.id === itemToRemove)
 
   const handleUpdateQuantity = (productId: string, currentQuantity: number, change: number) => {
     const newQuantity = currentQuantity + change
@@ -80,10 +83,17 @@ export default function Cart() {
                     key={item.id}
                     layout
                     initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
+                    animate={{ 
+                      opacity: 1, 
+                      x: 0,
+                      // 🔥 Opción 2: Cambiar color cuando está seleccionado para eliminar
+                      backgroundColor: showRemoveModal && itemToRemove === item.id 
+                        ? "#f3f4f6"  // gray-100
+                        : "#ffffff"
+                    }}
                     exit={{ opacity: 0, x: 20 }}
                     transition={{ duration: 0.2 }}
-                    className="p-4"
+                    className="p-4 rounded-lg transition-colors duration-200"
                   >
                     {/* Grid para desktop - 12 columnas */}
                     <div className="hidden md:grid grid-cols-12 gap-4 items-center">
@@ -224,7 +234,7 @@ export default function Cart() {
             
             {items.length > 0 && (
               <button
-                onClick={() => setShowClearModal(true)} // ✅ Cambiado: abre el modal, no ejecuta clear directamente
+                onClick={() => setShowClearModal(true)}
                 className="text-red-500 hover:text-red-700 transition"
               >
                 Vaciar carrito
@@ -277,22 +287,21 @@ export default function Cart() {
         </div>
       </div>
 
-      {/* ✅ Modales movidos FUERA del div flex para que no afecten el layout */}
-      {/* Modal personalizado para Vaciar Carrito */}
+      {/* Modal para Vaciar Carrito */}
       <AnimatePresence>
         {showClearModal && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+            className="fixed inset-0 flex items-center justify-center z-50"
             onClick={() => setShowClearModal(false)}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-lg p-6 max-w-md mx-4"
+              className="bg-white rounded-lg p-6 max-w-md mx-4 shadow-2xl border-2 border-gray-200"
               onClick={(e) => e.stopPropagation()}
             >
               <h3 className="text-xl font-bold mb-4">Vaciar Carrito</h3>
@@ -318,9 +327,9 @@ export default function Cart() {
         )}
       </AnimatePresence>
 
-      {/* Modal para eliminar un producto */}
+      {/* 🔥 Modal para eliminar un producto MEJORADO con información del producto */}
       <AnimatePresence>
-        {showRemoveModal && itemToRemove && (
+        {showRemoveModal && itemToRemove && productToRemove && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -335,10 +344,36 @@ export default function Cart() {
               className="bg-white rounded-lg p-6 max-w-md mx-4 shadow-2xl border-2 border-gray-200"
               onClick={(e) => e.stopPropagation()}
             >
-              <h3 className="text-xl font-bold mb-4">Eliminar Producto</h3>
+              <h3 className="text-xl font-bold mb-4 text-red-600">Eliminar Producto</h3>
+              
+              {/* 🔥 Información detallada del producto a eliminar */}
+              <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg mb-6">
+                {productToRemove.image_url && (
+                  <img 
+                    src={productToRemove.image_url} 
+                    alt={productToRemove.name}
+                    className="w-16 h-16 object-cover rounded-md"
+                  />
+                )}
+                <div className="flex-1">
+                  <p className="font-semibold text-gray-800">{productToRemove.name}</p>
+                  {productToRemove.category && (
+                    <p className="text-sm text-gray-500">{productToRemove.category}</p>
+                  )}
+                  <p className="text-sm mt-1">
+                    <span className="text-gray-500">Cantidad:</span>{' '}
+                    <span className="font-medium">{productToRemove.quantity}</span>
+                    {' • '}
+                    <span className="text-gray-500">Precio:</span>{' '}
+                    <span className="font-medium">${productToRemove.price.toFixed(2)}</span>
+                  </p>
+                </div>
+              </div>
+              
               <p className="text-gray-600 mb-6">
                 ¿Estás seguro de que quieres eliminar este producto del carrito?
               </p>
+              
               <div className="flex gap-3 justify-end">
                 <button
                   onClick={() => setShowRemoveModal(false)}
